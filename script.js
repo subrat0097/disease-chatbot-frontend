@@ -1,4 +1,4 @@
-const API = 'http://127.0.0.1:5000';  // Change to deployed URL in Phase 5
+const API = 'https://medibot-api-u6uj.onrender.com';  // Change to deployed URL in Phase 5
 
 let allSymptoms    = [];
 let selectedSymptoms = [];
