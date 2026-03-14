@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Disease Predictor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-wrapper">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">&#43;</span>
+        <span class="logo-text">MediBot</span>
+      </div>
+      <p class="sidebar-sub">AI symptom checker</p>
+      <hr class="divider"/>
+      <p class="sidebar-label">How it works</p>
+      <ul class="sidebar-steps">
+        <li>1. Enter your age &amp; gender</li>
+        <li>2. Select your symptoms</li>
+        <li>3. Get a prediction instantly</li>
+      </ul>
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong> This tool is for educational purposes only. Always consult a doctor.
+      </div>
+    </aside>
+
+    <!-- Main chat area -->
+    <main class="chat-main">
+      <div class="chat-header">
+        <span class="status-dot"></span>
+        MediBot — Disease Prediction Assistant
+      </div>
+
+      <div class="chat-window" id="chatWindow">
+        <!-- Messages appear here -->
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area" id="inputArea">
+        <!-- Dynamic input rendered by JS -->
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
