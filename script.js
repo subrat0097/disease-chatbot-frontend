@@ -122,24 +122,46 @@ async function predict() {
 
 // ── Show result card ──────────────────────────────────────
 function showResult(data) {
+  const labelColors = {
+    "Very Common": "#38d9a9",
+    "Common":      "#4f8ef7",
+    "Possible":    "#f7a84f",
+    "Unlikely":    "#e05c5c"
+  };
+
   const top3Html = data.top3.map((item, i) => `
     <div class="top3-item">
-      <span class="top3-name">${i + 1}. ${item.disease}</span>
+      <div class="top3-left">
+        <span class="top3-name">${i + 1}. ${item.disease}</span>
+        <span class="top3-tag" style="background:${labelColors[item.label] || '#4f8ef7'}22;
+              color:${labelColors[item.label] || '#4f8ef7'};
+              border:1px solid ${labelColors[item.label] || '#4f8ef7'}55;">
+          ${item.label}
+        </span>
+      </div>
       <span class="top3-badge">${item.confidence}%</span>
     </div>
+    <div class="top3-desc">${item.description}</div>
   `).join('');
 
   const card = `
     <div class="result-card">
       <div class="result-top">
         <div class="result-disease">🩺 ${data.prediction}</div>
-        <div class="result-conf">Confidence: ${data.confidence}%</div>
+        <div class="result-conf">
+          <span class="conf-label-badge" style="background:${labelColors[data.label] || '#4f8ef7'}22;
+                color:${labelColors[data.label] || '#4f8ef7'};">
+            ${data.label}
+          </span>
+          ${data.confidence}% confidence
+        </div>
       </div>
       <div class="conf-bar-wrap">
         <div class="conf-bar" style="width:${data.confidence}%"></div>
       </div>
+      <div class="result-desc-main">${data.description}</div>
       <div class="top3-list">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Top 3 possibilities</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Top 3 possibilities</div>
         ${top3Html}
       </div>
     </div>
