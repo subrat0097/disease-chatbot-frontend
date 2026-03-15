@@ -177,8 +177,7 @@ function appendMessage(type, html) {
   div.className = `msg ${type}`;
   div.innerHTML = `
     <div class="avatar">${type === 'bot' ? '+' : 'U'}</div>
-    <div class="bubble">${html}</div>
-  `;
+    <div class="bubble">${html}</div>`;
   document.getElementById('chatWindow').appendChild(div);
   scrollBottom();
 }
