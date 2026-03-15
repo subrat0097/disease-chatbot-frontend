@@ -247,3 +247,23 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   max-height: 80vh;
   resize: none; /* we handle it manually */
 }
+
+/* Hospital cards */
+.hospital-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.hospital-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; gap: 10px;
+}
+.hospital-info { display: flex; flex-direction: column; gap: 3px; }
+.hospital-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.hospital-dist { font-size: 11px; color: var(--muted); }
+.directions-btn {
+  padding: 6px 14px; background: var(--accent);
+  color: #fff; border-radius: 8px; font-size: 12px;
+  font-weight: 600; text-decoration: none; white-space: nowrap;
+  transition: opacity .15s;
+}
+.directions-btn:hover { opacity: .85; }

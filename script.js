@@ -222,6 +222,138 @@ function showResult(data, duration = null) {
   div.innerHTML = `<div class="avatar">+</div><div class="bubble">${card}</div>`;
   document.getElementById('chatWindow').appendChild(div);
   scrollBottom();
+  // Ask for location after result
+  setTimeout(() => askForLocation(data.prediction), 800);
+}
+
+// ── Location & Hospital Finder ────────────────────────────
+function askForLocation(disease) {
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'locationAsk';
+  div.innerHTML = `
+    <div class="avatar">+</div>
+    <div class="bubble">
+      <div style="margin-bottom:10px">📍 Would you like me to find <strong>nearby hospitals</strong> that can help with <strong>${disease}</strong>?</div>
+      <div style="display:flex;gap:8px;">
+        <button class="duration-btn" onclick="getLocation('${disease}', this)" style="border-color:var(--accent);color:var(--accent);">
+          📍 Yes, find hospitals
+        </button>
+        <button class="duration-btn" onclick="skipLocation(this)">
+          No thanks
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById('chatWindow').appendChild(div);
+  scrollBottom();
+}
+
+function skipLocation(btnEl) {
+  btnEl.closest('.bubble').innerHTML = '<span style="color:var(--muted);font-size:13px">Hospital search skipped.</span>';
+}
+
+async function getLocation(disease, btnEl) {
+  btnEl.closest('.bubble').innerHTML = '<span style="color:var(--muted);font-size:13px">📍 Getting your location...</span>';
+
+  if (!navigator.geolocation) {
+    botMessage("⚠️ Geolocation is not supported by your browser.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      await findHospitals(lat, lon, disease);
+    },
+    (err) => {
+      botMessage("⚠️ Could not get your location. Please allow location access and try again.");
+    }
+  );
+}
+
+async function findHospitals(lat, lon, disease) {
+  const typingId = showTyping();
+
+  try {
+    // Search nearby hospitals using Overpass API
+    const radius = 5000; // 5km radius
+    const query = `
+      [out:json][timeout:25];
+      (
+        node["amenity"="hospital"](around:${radius},${lat},${lon});
+        way["amenity"="hospital"](around:${radius},${lat},${lon});
+        node["amenity"="clinic"](around:${radius},${lat},${lon});
+      );
+      out body 5;
+    `;
+
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: query
+    });
+
+    const data = await res.json();
+    removeTyping(typingId);
+
+    if (!data.elements || data.elements.length === 0) {
+      botMessage("😕 No hospitals found within 5km. Try allowing more precise location access.");
+      return;
+    }
+
+    // Build hospital cards
+    const hospitals = data.elements.slice(0, 4).map(el => {
+      const name    = el.tags?.name || "Unnamed Hospital";
+      const hLat    = el.lat || el.center?.lat;
+      const hLon    = el.lon || el.center?.lon;
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${hLat},${hLon}`;
+      const dist    = getDistanceKm(lat, lon, hLat, hLon);
+      return { name, dist, mapsUrl };
+    }).sort((a, b) => a.dist - b.dist);
+
+    const hospitalsHtml = hospitals.map(h => `
+      <div class="hospital-card">
+        <div class="hospital-info">
+          <div class="hospital-name">🏥 ${h.name}</div>
+          <div class="hospital-dist">📍 ${h.dist} km away</div>
+        </div>
+        <a href="${h.mapsUrl}" target="_blank" class="directions-btn">Get Directions</a>
+      </div>
+    `).join('');
+
+    const div = document.createElement('div');
+    div.className = 'msg bot';
+    div.innerHTML = `
+      <div class="avatar">+</div>
+      <div class="bubble">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">
+          🏥 Nearby hospitals for <span style="color:var(--accent2)">${disease}</span>
+        </div>
+        <div class="hospital-list">${hospitalsHtml}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">
+          Showing hospitals within 5km of your location.
+        </div>
+      </div>
+    `;
+    document.getElementById('chatWindow').appendChild(div);
+    scrollBottom();
+
+  } catch (err) {
+    removeTyping(typingId);
+    botMessage("⚠️ Could not fetch nearby hospitals. Please try again.");
+  }
+}
+
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+  if (!lat2 || !lon2) return "?";
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1);
 }
 
 function resetSymptoms() {
