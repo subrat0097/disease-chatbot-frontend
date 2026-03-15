@@ -232,7 +232,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 /* Drag handle */
 .drag-handle {
   width: 100%; display: flex; justify-content: center;
-  align-items: center; padding: 4px 0; cursor: ns-resize;
+  align-items: center; padding: 6px 0 4px 0;
+  cursor: ns-resize !important;
   margin-bottom: 4px;
 }
 .drag-bar {

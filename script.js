@@ -25,6 +25,9 @@ async function loadSymptoms() {
 // ── Render input panel ────────────────────────────────────
 function renderInputArea() {
   document.getElementById('inputArea').innerHTML = `
+    <div class="drag-handle" id="dragHandle">
+      <div class="drag-bar"></div>
+    </div>
     <div class="row-inputs">
       <div class="field-group">
         <label>Age</label>
@@ -50,6 +53,60 @@ function renderInputArea() {
 
     <button class="btn-predict" id="predictBtn" onclick="predict()">Predict Disease</button>
   `;
+
+  // Init drag after DOM is ready
+  initDragHandle();
+}
+
+function initDragHandle() {
+  const handle    = document.getElementById('dragHandle');
+  const inputArea = document.getElementById('inputArea');
+  if (!handle || !inputArea) return;
+
+  let isDragging = false;
+  let startY     = 0;
+  let startHeight = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    isDragging  = true;
+    startY      = e.clientY;
+    startHeight = inputArea.offsetHeight;
+    document.body.style.cursor = 'ns-resize';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const delta     = startY - e.clientY;
+    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
+    inputArea.style.height = newHeight + 'px';
+    inputArea.style.flex   = 'none';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      document.body.style.cursor = '';
+    }
+  });
+
+  // Touch support
+  handle.addEventListener('touchstart', (e) => {
+    isDragging  = true;
+    startY      = e.touches[0].clientY;
+    startHeight = inputArea.offsetHeight;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const delta     = startY - e.touches[0].clientY;
+    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
+    inputArea.style.height = newHeight + 'px';
+    inputArea.style.flex   = 'none';
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => { isDragging = false; });
 }
 
 // ── Chips ─────────────────────────────────────────────────
