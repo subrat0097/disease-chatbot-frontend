@@ -151,7 +151,7 @@ function showResult(data) {
 
   const div = document.createElement('div');
   div.className = 'msg bot';
-  div.innerHTML = `<div class="avatar"><img src="medibot-logo.png" alt="MediBot"/></div><div class="bubble">${card}</div>`;
+  div.innerHTML = `<div class="avatar">+</div><div class="bubble">${card}</div>`;
   document.getElementById('chatWindow').appendChild(div);
   scrollBottom();
 }
@@ -176,7 +176,7 @@ function appendMessage(type, html) {
   const div = document.createElement('div');
   div.className = `msg ${type}`;
   div.innerHTML = `
-    <div class="avatar">${type === 'bot' ? '<img src="medibot-logo.png" alt="MediBot"/>' : 'U'}</div>
+    <div class="avatar">${type === 'bot' ? '+' : 'U'}</div>
     <div class="bubble">${html}</div>
   `;
   document.getElementById('chatWindow').appendChild(div);
@@ -187,7 +187,7 @@ function showTyping() {
   const id  = 'typing-' + Date.now();
   const div = document.createElement('div');
   div.className = 'msg bot'; div.id = id;
-  div.innerHTML = `<div class="avatar"><img src="medibot-logo.png" alt="MediBot"/></div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  div.innerHTML = `<div class="avatar">+</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
   document.getElementById('chatWindow').appendChild(div);
   scrollBottom();
   return id;
