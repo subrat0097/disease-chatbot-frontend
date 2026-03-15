@@ -207,3 +207,24 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   border-left: 2px solid var(--border);
   padding-left: 8px;
 }
+
+/* Duration picker */
+.duration-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.duration-btn {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted);
+  transition: all .15s; font-family: var(--font);
+}
+.duration-btn:hover:not(:disabled) {
+  border-color: var(--accent); color: var(--accent);
+}
+
+/* Duration in result card */
+.result-duration {
+  font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px; margin-top: 4px;
+}

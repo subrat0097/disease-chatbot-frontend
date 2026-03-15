@@ -1,4 +1,4 @@
-const API = 'https://medibot-api-u6uj.onrender.com';  // Change to deployed URL in Phase 5
+const API = 'https://medibot-api-u6uj.onrender.com';
 
 let allSymptoms    = [];
 let selectedSymptoms = [];
@@ -99,29 +99,74 @@ async function predict() {
   if (!age || age < 1) { botMessage("⚠️ Please enter a valid age."); return; }
   if (selectedSymptoms.length === 0) { botMessage("⚠️ Please select at least one symptom."); return; }
 
-  // Echo user message
   userMessage(`Age: ${age} | Gender: ${gender} | Symptoms: ${selectedSymptoms.join(', ')}`);
 
-  // Typing indicator
+  botMessage("🕒 One more thing — <strong>how long have you been experiencing these symptoms?</strong>");
+  showDurationPicker(age, gender);
+}
+
+// ── Duration Picker ───────────────────────────────────────
+function showDurationPicker(age, gender) {
+  const durations = [
+    "Not sure",
+    "Less than a day",
+    "1 - 3 days",
+    "4 - 7 days",
+    "1 - 2 weeks",
+    "2 - 4 weeks",
+    "1 - 3 months",
+    "More than 3 months"
+  ];
+
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'durationPicker';
+  div.innerHTML = `
+    <div class="avatar">+</div>
+    <div class="bubble">
+      <div class="duration-grid">
+        ${durations.map(d => `
+          <button class="duration-btn" onclick="selectDuration('${d}', ${age}, '${gender}', this)">
+            ${d}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('chatWindow').appendChild(div);
+  scrollBottom();
+}
+
+async function selectDuration(duration, age, gender, btnEl) {
+  document.querySelectorAll('.duration-btn').forEach(b => {
+    b.disabled = true;
+    b.style.opacity = '0.5';
+  });
+  btnEl.style.opacity = '1';
+  btnEl.style.borderColor = 'var(--accent)';
+  btnEl.style.color = 'var(--accent)';
+
+  userMessage(`Duration: ${duration}`);
+
   const typingId = showTyping();
 
   try {
     const res  = await fetch(`${API}/predict`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ symptoms: selectedSymptoms, age, gender })
+      body:    JSON.stringify({ symptoms: selectedSymptoms, age, gender, duration })
     });
     const data = await res.json();
     removeTyping(typingId);
-    showResult(data);
+    showResult(data, duration);
   } catch {
     removeTyping(typingId);
-    botMessage("❌ Could not reach the backend. Is <code>app.py</code> running on port 5000?");
+    botMessage("❌ Could not reach the backend. Is <code>app.py</code> running?");
   }
 }
 
 // ── Show result card ──────────────────────────────────────
-function showResult(data) {
+function showResult(data, duration = null) {
   const labelColors = {
     "Very Common": "#38d9a9",
     "Common":      "#4f8ef7",
@@ -164,6 +209,7 @@ function showResult(data) {
         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Top 3 possibilities</div>
         ${top3Html}
       </div>
+      ${duration ? `<div class="result-duration">🕒 Symptoms since: <strong>${duration}</strong></div>` : ''}
     </div>
     <div style="font-size:12px;color:var(--muted);margin-top:4px">
       ⚠️ This is not a medical diagnosis. Please consult a healthcare professional.
