@@ -267,3 +267,57 @@ function scrollBottom() {
   const w = document.getElementById('chatWindow');
   w.scrollTop = w.scrollHeight;
 }
+
+// ── Drag to resize input area ─────────────────────────────
+(function() {
+  let isDragging = false;
+  let startY = 0;
+  let startHeight = 0;
+
+  const handle  = document.getElementById('dragHandle');
+  const inputArea = document.getElementById('inputArea');
+  const chatWindow = document.getElementById('chatWindow');
+
+  if (!handle || !inputArea) return;
+
+  handle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startY = e.clientY;
+    startHeight = inputArea.offsetHeight;
+    document.body.style.cursor = 'ns-resize';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const delta = startY - e.clientY; // drag up = bigger
+    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
+    inputArea.style.height = newHeight + 'px';
+    inputArea.style.flex = 'none';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      document.body.style.cursor = '';
+    }
+  });
+
+  // Touch support for mobile
+  handle.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startY = e.touches[0].clientY;
+    startHeight = inputArea.offsetHeight;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const delta = startY - e.touches[0].clientY;
+    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
+    inputArea.style.height = newHeight + 'px';
+    inputArea.style.flex = 'none';
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => { isDragging = false; });
+})();
