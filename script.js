@@ -235,31 +235,15 @@ function showResult(data, duration = null) {
     <div class="top3-item">
       <div class="top3-left">
         <span class="top3-name">${i + 1}. ${item.disease}</span>
-        <span class="top3-tag" style="background:${labelColors[item.label] || '#4f8ef7'}22;
-              color:${labelColors[item.label] || '#4f8ef7'};
-              border:1px solid ${labelColors[item.label] || '#4f8ef7'}55;">
-          ${item.label}
-        </span>
       </div>
-      <span class="top3-badge">${item.confidence}%</span>
     </div>
     <div class="top3-desc">${item.description}</div>
   `).join('');
-
   const card = `
     <div class="result-card">
       <div class="result-top">
         <div class="result-disease">🩺 ${data.prediction}</div>
-        <div class="result-conf">
-          <span class="conf-label-badge" style="background:${labelColors[data.label] || '#4f8ef7'}22;
-                color:${labelColors[data.label] || '#4f8ef7'};">
-            ${data.label}
-          </span>
-          ${data.confidence}% confidence
-        </div>
-      </div>
-      <div class="conf-bar-wrap">
-        <div class="conf-bar" style="width:${data.confidence}%"></div>
+        <div class="result-conf"></div>
       </div>
       <div class="result-desc-main">${data.description}</div>
       <div class="top3-list">
