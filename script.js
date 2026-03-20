@@ -231,14 +231,34 @@ function showResult(data, duration = null) {
     "Unlikely":    "#e05c5c"
   };
 
-  const top3Html = data.top3.map((item, i) => `
-    <div class="top3-item">
-      <div class="top3-left">
-        <span class="top3-name">${i + 1}. ${item.disease}</span>
-      </div>
-    </div>
-    <div class="top3-desc">${item.description}</div>
-  `).join('');
+  const top3Html = data.top3.map((item, i) => {
+      const matchedHtml = item.matched_symptoms && item.matched_symptoms.length > 0
+        ? item.matched_symptoms.map(s =>
+            `<span class="matched-tag">${s.replace(/_/g, ' ')}</span>`
+          ).join('')
+        : '<span style="color:var(--muted);font-size:11px">No direct symptom match found</span>';
+
+      return `
+        <div class="top3-item">
+         <div class="top3-left">
+            <span class="top3-name">${i + 1}. ${item.disease}</span>
+          </div>
+        </div>
+        <div class="top3-desc">${item.description}</div>
+        <div class="justifier">
+          <div class="justifier-toggle" onclick="toggleJustifier(this)">
+            🔍 Why this prediction?
+          </div>
+          <div class="justifier-body" style="display:none">
+            <div class="justifier-summary">
+              <strong>${item.matched_symptoms ? item.matched_symptoms.length : 0}</strong> 
+              of your symptoms match this disease:
+            </div>
+            <div class="justifier-tags">${matchedHtml}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
   const card = `
     <div class="result-card">
       <div class="result-top">
@@ -494,3 +514,10 @@ function scrollBottom() {
 
   document.addEventListener('touchend', () => { isDragging = false; });
 })();
+
+function toggleJustifier(el) {
+  const body = el.nextElementSibling;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  el.textContent = isOpen ? '🔍 Why this prediction?' : '🔼 Hide explanation';
+}
