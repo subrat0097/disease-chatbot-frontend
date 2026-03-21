@@ -299,14 +299,6 @@ function showResult(data, duration = null) {
             <div class="justifier-section-title">❌ Your symptoms not linked to this disease</div>
             <div class="justifier-tags">${unmatchedHtml}</div>
 
-            <!-- How ranking works -->
-            <div class="justifier-how">
-              <strong>How ranking works:</strong> Our model uses a Random Forest of 280 decision trees. 
-              Each tree votes for a disease based on your symptoms. 
-              The disease with the most votes ranks highest.
-              <em>${item.disease}</em> received the ${i === 0 ? 'most' : i === 1 ? 'second most' : 'third most'} votes.
-            </div>
-
             <!-- Urgency -->
             <div class="justifier-urgency">${urgency}</div>
 
@@ -318,7 +310,19 @@ function showResult(data, duration = null) {
     <div class="result-card">
       <div class="result-top">
         <div class="result-disease">🩺 ${data.prediction}</div>
-        <div class="result-conf"></div>
+        <button class="info-btn" onclick="toggleModelInfo(this)" title="How does this work?">ⓘ</button>
+      </div>
+      <div class="model-info-box" style="display:none">
+        <div class="model-info-title">⚙️ How MediBot predicts diseases</div>
+        <div class="model-info-body">
+          MediBot uses an <strong>ensemble of 3 ML algorithms</strong> that work together:
+          <ul class="model-info-list">
+            <li><strong>🌲 Random Forest (280 trees)</strong> — Each tree independently analyzes your symptoms and votes for a disease. The disease with most votes wins.</li>
+            <li><strong>📈 Gradient Boosting (150 trees)</strong> — Learns from mistakes of previous trees, focuses on harder to classify symptoms.</li>
+            <li><strong>🔵 Support Vector Machine (SVM)</strong> — Finds the best boundary between diseases based on your symptom pattern.</li>
+          </ul>
+          All 3 algorithms vote together — the disease with the <strong>highest combined score ranks #1</strong>.
+        </div>
       </div>
       <div class="result-desc-main">${data.description}</div>
       <div class="top3-list">
@@ -575,4 +579,12 @@ function toggleJustifier(el) {
   const isOpen = body.style.display !== 'none';
   body.style.display  = isOpen ? 'none' : 'block';
   el.textContent = isOpen ? '🔍 Why this prediction?' : '🔼 Hide explanation';
+}
+
+function toggleModelInfo(btn) {
+  const box = btn.nextElementSibling;
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  btn.style.background = isOpen ? 'transparent' : 'var(--accent)';
+  btn.style.color = isOpen ? 'var(--accent)' : '#fff';
 }

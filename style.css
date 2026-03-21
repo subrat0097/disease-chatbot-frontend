@@ -332,3 +332,35 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   background: #1a1c26; border: 1px solid var(--border);
   display: inline-block;
 }
+
+/* Info button */
+.info-btn {
+  background: transparent; border: 1px solid var(--accent);
+  color: var(--accent); border-radius: 50%;
+  width: 24px; height: 24px; font-size: 13px;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all .2s;
+  flex-shrink: 0;
+}
+.info-btn:hover { background: var(--accent); color: #fff; }
+
+/* Model info box */
+.model-info-box {
+  background: #1a1c26; border: 1px solid var(--accent);
+  border-radius: 10px; padding: 14px;
+  margin: 4px 0 8px 0;
+}
+.model-info-title {
+  font-size: 13px; font-weight: 700;
+  color: var(--accent); margin-bottom: 8px;
+}
+.model-info-body {
+  font-size: 12px; color: var(--muted);
+  line-height: 1.7;
+}
+.model-info-list {
+  margin: 8px 0 0 16px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.model-info-list li { color: var(--muted); }
+.model-info-list strong { color: var(--text); }
