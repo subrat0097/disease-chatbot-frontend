@@ -582,7 +582,8 @@ function toggleJustifier(el) {
 }
 
 function toggleModelInfo(btn) {
-  const box = btn.nextElementSibling;
+  const card = btn.closest('.result-card');
+  const box  = card.querySelector('.model-info-box');
   const isOpen = box.style.display !== 'none';
   box.style.display = isOpen ? 'none' : 'block';
   btn.style.background = isOpen ? 'transparent' : 'var(--accent)';
