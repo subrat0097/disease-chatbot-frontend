@@ -232,15 +232,39 @@ function showResult(data, duration = null) {
   };
 
   const top3Html = data.top3.map((item, i) => {
-      const matchedHtml = item.matched_symptoms && item.matched_symptoms.length > 0
-        ? item.matched_symptoms.map(s =>
-            `<span class="matched-tag">${s.replace(/_/g, ' ')}</span>`
-          ).join('')
+      const matched   = item.matched_symptoms || [];
+      const total     = item.total_known || 8;
+      const matchPct  = total > 0 ? Math.round((matched.length / total) * 100) : 0;
+
+    // Unmatched from user's selected symptoms
+      const unmatched = selectedSymptoms.filter(s => !matched.includes(s));
+
+    // Ranking reason
+      const rankReasons = [
+      "Ranked #1 — highest symptom overlap with your inputs",
+      "Ranked #2 — second closest symptom match",
+      "Ranked #3 — possible but fewer symptoms align"
+      ];
+
+    // Urgency flag
+      let urgency = '';
+      if (matched.length >= 5)      urgency = '🔴 Consider seeking medical attention soon';
+      else if (matched.length >= 3) urgency = '🟡 Consider consulting a doctor';
+      else                          urgency = '🟢 Monitor your symptoms at home';
+
+    // Matched tags
+      const matchedHtml = matched.length > 0
+        ? matched.map(s => `<span class="matched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
         : '<span style="color:var(--muted);font-size:11px">No direct symptom match found</span>';
+
+    // Unmatched tags
+      const unmatchedHtml = unmatched.length > 0
+        ? unmatched.map(s => `<span class="unmatched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
+        : '<span style="color:var(--muted);font-size:11px">All your symptoms matched</span>';
 
       return `
         <div class="top3-item">
-         <div class="top3-left">
+          <div class="top3-left">
             <span class="top3-name">${i + 1}. ${item.disease}</span>
           </div>
         </div>
@@ -250,11 +274,38 @@ function showResult(data, duration = null) {
             🔍 Why this prediction?
           </div>
           <div class="justifier-body" style="display:none">
-            <div class="justifier-summary">
-              <strong>${item.matched_symptoms ? item.matched_symptoms.length : 0}</strong> 
-              of your symptoms match this disease:
+
+            <!-- Ranking reason -->
+            <div class="justifier-rank">${rankReasons[i]}</div>
+
+            <!-- Symptom match bar -->
+            <div class="justifier-bar-label">
+              Symptom match: <strong>${matched.length}</strong> of <strong>${total}</strong> known symptoms
             </div>
+            <div class="justifier-bar-wrap">
+              <div class="justifier-bar-fill" style="width:${matchPct}%"></div>
+            </div>
+            <div class="justifier-bar-pct">${matchPct}% match</div>
+
+            <!-- Matched symptoms -->
+            <div class="justifier-section-title">✅ Matched symptoms</div>
             <div class="justifier-tags">${matchedHtml}</div>
+
+            <!-- Unmatched symptoms -->
+            <div class="justifier-section-title">❌ Your symptoms not linked to this disease</div>
+            <div class="justifier-tags">${unmatchedHtml}</div>
+
+            <!-- How ranking works -->
+            <div class="justifier-how">
+              <strong>How ranking works:</strong> Our model uses a Random Forest of 280 decision trees. 
+              Each tree votes for a disease based on your symptoms. 
+              The disease with the most votes ranks highest.
+              <em>${item.disease}</em> received the ${i === 0 ? 'most' : i === 1 ? 'second most' : 'third most'} votes.
+            </div>
+
+            <!-- Urgency -->
+            <div class="justifier-urgency">${urgency}</div>
+
           </div>
         </div>
       `;
@@ -516,8 +567,8 @@ function scrollBottom() {
 })();
 
 function toggleJustifier(el) {
-  const body = el.nextElementSibling;
+  const body   = el.nextElementSibling;
   const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
+  body.style.display  = isOpen ? 'none' : 'block';
   el.textContent = isOpen ? '🔍 Why this prediction?' : '🔼 Hide explanation';
 }

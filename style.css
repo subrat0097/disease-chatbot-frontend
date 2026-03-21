@@ -271,7 +271,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 
 /* Justifier */
 .justifier {
-  margin: 4px 0 10px 0;
+  margin: 4px 0 12px 0;
   border-left: 2px solid var(--border);
   padding-left: 10px;
 }
@@ -283,14 +283,52 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .justifier-toggle:hover { opacity: .75; }
 .justifier-body {
   margin-top: 8px;
+  display: flex; flex-direction: column; gap: 8px;
 }
-.justifier-summary {
+.justifier-rank {
+  font-size: 12px; color: var(--accent2);
+  font-weight: 600;
+}
+.justifier-bar-label {
   font-size: 12px; color: var(--muted);
-  margin-bottom: 6px;
+}
+.justifier-bar-wrap {
+  background: #2a2d3a; border-radius: 4px; height: 8px; width: 100%;
+}
+.justifier-bar-fill {
+  height: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .6s ease;
+}
+.justifier-bar-pct {
+  font-size: 11px; color: var(--muted); text-align: right;
+}
+.justifier-section-title {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+  margin-top: 4px;
+}
+.justifier-tags {
+  display: flex; flex-wrap: wrap; gap: 5px;
 }
 .matched-tag {
+  padding: 3px 9px; background: #1a3a2a;
+  border: 1px solid var(--accent2);
+  border-radius: 20px; font-size: 11px; color: var(--accent2);
+}
+.unmatched-tag {
+  padding: 3px 9px; background: #2a1a1a;
+  border: 1px solid var(--danger);
+  border-radius: 20px; font-size: 11px; color: var(--danger);
+}
+.justifier-how {
+  font-size: 11px; color: var(--muted);
+  background: #1a1c26; border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px; line-height: 1.6;
+}
+.justifier-urgency {
+  font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px;
+  background: #1a1c26; border: 1px solid var(--border);
   display: inline-block;
-  padding: 3px 9px; margin: 3px 3px;
-  background: #1a2f5a; border: 1px solid var(--accent);
-  border-radius: 20px; font-size: 11px; color: #8ab4f8;
 }
