@@ -285,7 +285,11 @@ function showResult(data, duration = null) {
             <div class="justifier-bar-wrap">
               <div class="justifier-bar-fill" style="width:${matchPct}%"></div>
             </div>
-            <div class="justifier-bar-pct">${matchPct}% match</div>
+            <div class="justifier-bar-pct">${
+              matchPct >= 60 ? '🟢 Strong match' :
+              matchPct >= 30 ? '🟡 Moderate match' :
+              '🔴 Weak match'
+            }</div>
 
             <!-- Matched symptoms -->
             <div class="justifier-section-title">✅ Matched symptoms</div>
