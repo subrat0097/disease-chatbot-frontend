@@ -54,7 +54,6 @@ function renderInputArea() {
     <button class="btn-predict" id="predictBtn" onclick="predict()">Predict Disease</button>
   `;
 
-  // Init drag after DOM is ready
   initDragHandle();
 }
 
@@ -90,7 +89,6 @@ function initDragHandle() {
     }
   });
 
-  // Touch support
   handle.addEventListener('touchstart', (e) => {
     isDragging  = true;
     startY      = e.touches[0].clientY;
@@ -165,14 +163,8 @@ async function predict() {
 // ── Duration Picker ───────────────────────────────────────
 function showDurationPicker(age, gender) {
   const durations = [
-    "Not sure",
-    "Less than a day",
-    "1 - 3 days",
-    "4 - 7 days",
-    "1 - 2 weeks",
-    "2 - 4 weeks",
-    "1 - 3 months",
-    "More than 3 months"
+    "Not sure", "Less than a day", "1 - 3 days", "4 - 7 days",
+    "1 - 2 weeks", "2 - 4 weeks", "1 - 3 months", "More than 3 months"
   ];
 
   const div = document.createElement('div');
@@ -204,7 +196,6 @@ async function selectDuration(duration, age, gender, btnEl) {
   btnEl.style.color = 'var(--accent)';
 
   userMessage(`Duration: ${duration}`);
-
   const typingId = showTyping();
 
   try {
@@ -224,88 +215,86 @@ async function selectDuration(duration, age, gender, btnEl) {
 
 // ── Show result card ──────────────────────────────────────
 function showResult(data, duration = null) {
-  const labelColors = {
-    "Very Common": "#38d9a9",
-    "Common":      "#4f8ef7",
-    "Possible":    "#f7a84f",
-    "Unlikely":    "#e05c5c"
-  };
-
   const top3Html = data.top3.map((item, i) => {
-      const matched   = item.matched_symptoms || [];
-      const total     = item.total_known || 8;
-      const matchPct  = total > 0 ? Math.round((matched.length / total) * 100) : 0;
+    const matched   = item.matched_symptoms || [];
+    const total     = item.total_known || 8;
+    const matchPct  = total > 0 ? Math.round((matched.length / total) * 100) : 0;
+    const unmatched = selectedSymptoms.filter(s => !matched.includes(s));
 
-    // Unmatched from user's selected symptoms
-      const unmatched = selectedSymptoms.filter(s => !matched.includes(s));
-
-    // Ranking reason
-      const rankReasons = [
+    const rankReasons = [
       "Ranked #1 — highest symptom overlap with your inputs",
       "Ranked #2 — second closest symptom match",
       "Ranked #3 — possible but fewer symptoms align"
-      ];
+    ];
 
-    // Urgency flag
-      let urgency = '';
-      if (matched.length >= 5)      urgency = '🔴 Consider seeking medical attention soon';
-      else if (matched.length >= 3) urgency = '🟡 Consider consulting a doctor';
-      else                          urgency = '🟢 Monitor your symptoms at home';
+    let urgency = '';
+    if (matched.length >= 5)      urgency = '🔴 Consider seeking medical attention soon';
+    else if (matched.length >= 3) urgency = '🟡 Consider consulting a doctor';
+    else                          urgency = '🟢 Monitor your symptoms at home';
 
-    // Matched tags
-      const matchedHtml = matched.length > 0
-        ? matched.map(s => `<span class="matched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
-        : '<span style="color:var(--muted);font-size:11px">No direct symptom match found</span>';
+    const matchedHtml = matched.length > 0
+      ? matched.map(s => `<span class="matched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
+      : '<span style="color:var(--muted);font-size:11px">No direct symptom match found</span>';
 
-    // Unmatched tags
-      const unmatchedHtml = unmatched.length > 0
-        ? unmatched.map(s => `<span class="unmatched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
-        : '<span style="color:var(--muted);font-size:11px">All your symptoms matched</span>';
+    const unmatchedHtml = unmatched.length > 0
+      ? unmatched.map(s => `<span class="unmatched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
+      : '<span style="color:var(--muted);font-size:11px">All your symptoms matched</span>';
 
-      return `
-        <div class="top3-item">
-          <div class="top3-left">
-            <span class="top3-name">${i + 1}. ${item.disease}</span>
-          </div>
+    // ── Precautions ──────────────────────────────────────
+    const precautions = item.precautions || [];
+    const needsDoctor = item.needs_doctor || false;
+
+    const precautionItemsHtml = precautions.length > 0
+      ? precautions.map(p => `<div class="precaution-item">💊 ${p}</div>`).join('')
+      : '<div class="precaution-item">No precautions available.</div>';
+
+    const doctorWarningHtml = needsDoctor
+      ? `<div class="precaution-doctor">🚨 This condition requires a doctor — please seek medical attention immediately.</div>`
+      : '';
+    // ────────────────────────────────────────────────────
+
+    return `
+      <div class="top3-item">
+        <div class="top3-left">
+          <span class="top3-name">${i + 1}. ${item.disease}</span>
         </div>
-        <div class="top3-desc">${item.description}</div>
-        <div class="justifier">
-          <div class="justifier-toggle" onclick="toggleJustifier(this)">
-            🔍 Why this prediction?
-          </div>
-          <div class="justifier-body" style="display:none">
-
-            <!-- Ranking reason -->
-            <div class="justifier-rank">${rankReasons[i]}</div>
-
-            <!-- Symptom match bar -->
-            <div class="justifier-bar-label">
-              Symptom match: <strong>${matched.length}</strong> of <strong>${total}</strong> known symptoms
-            </div>
-            <div class="justifier-bar-wrap">
-              <div class="justifier-bar-fill" style="width:${matchPct}%"></div>
-            </div>
-            <div class="justifier-bar-pct">${
-              matchPct >= 60 ? '🟢 Strong match' :
-              matchPct >= 30 ? '🟡 Moderate match' :
-              '🔴 Weak match'
-            }</div>
-
-            <!-- Matched symptoms -->
-            <div class="justifier-section-title">✅ Matched symptoms</div>
-            <div class="justifier-tags">${matchedHtml}</div>
-
-            <!-- Unmatched symptoms -->
-            <div class="justifier-section-title">❌ Your symptoms not linked to this disease</div>
-            <div class="justifier-tags">${unmatchedHtml}</div>
-
-            <!-- Urgency -->
-            <div class="justifier-urgency">${urgency}</div>
-
-          </div>
+      </div>
+      <div class="top3-desc">${item.description}</div>
+      <div class="justifier">
+        <div class="justifier-toggle" onclick="toggleJustifier(this)">
+          🔍 Why this prediction?
         </div>
-      `;
-    }).join('');
+        <div class="justifier-body" style="display:none">
+          <div class="justifier-rank">${rankReasons[i]}</div>
+          <div class="justifier-bar-label">
+            Symptom match: <strong>${matched.length}</strong> of <strong>${total}</strong> known symptoms
+          </div>
+          <div class="justifier-bar-wrap">
+            <div class="justifier-bar-fill" style="width:${matchPct}%"></div>
+          </div>
+          <div class="justifier-bar-pct">${
+            matchPct >= 60 ? '🟢 Strong match' :
+            matchPct >= 30 ? '🟡 Moderate match' :
+            '🔴 Weak match'
+          }</div>
+          <div class="justifier-section-title">✅ Matched symptoms</div>
+          <div class="justifier-tags">${matchedHtml}</div>
+          <div class="justifier-section-title">❌ Your symptoms not linked to this disease</div>
+          <div class="justifier-tags">${unmatchedHtml}</div>
+          <div class="justifier-urgency">${urgency}</div>
+        </div>
+      </div>
+
+      <!-- Precautions button + box -->
+      <button class="btn-solution" onclick="togglePrecautions(this)">💊 Show Precautions</button>
+      <div class="precaution-box" style="display:none">
+        ${doctorWarningHtml}
+        <div class="precaution-title">Recommended Precautions</div>
+        <div class="precaution-list">${precautionItemsHtml}</div>
+      </div>
+    `;
+  }).join('');
+
   const card = `
     <div class="result-card">
       <div class="result-top">
@@ -342,7 +331,6 @@ function showResult(data, duration = null) {
   div.innerHTML = `<div class="avatar">+</div><div class="bubble">${card}</div>`;
   document.getElementById('chatWindow').appendChild(div);
   scrollBottom();
-  // Ask for location after result
   setTimeout(() => askForLocation(data.prediction), 800);
 }
 
@@ -387,7 +375,7 @@ async function getLocation(disease, btnEl) {
       const lon = pos.coords.longitude;
       await findHospitals(lat, lon, disease);
     },
-    (err) => {
+    () => {
       botMessage("⚠️ Could not get your location. Please allow location access and try again.");
     }
   );
@@ -397,8 +385,7 @@ async function findHospitals(lat, lon, disease) {
   const typingId = showTyping();
 
   try {
-    // Search nearby hospitals using Overpass API
-    const radius = 5000; // 5km radius
+    const radius = 5000;
     const query = `
       [out:json][timeout:25];
       (
@@ -422,7 +409,6 @@ async function findHospitals(lat, lon, disease) {
       return;
     }
 
-    // Build hospital cards
     const hospitals = data.elements.slice(0, 4).map(el => {
       const name    = el.tags?.name || "Unnamed Hospital";
       const hLat    = el.lat || el.center?.lat;
@@ -459,7 +445,7 @@ async function findHospitals(lat, lon, disease) {
     document.getElementById('chatWindow').appendChild(div);
     scrollBottom();
 
-  } catch (err) {
+  } catch {
     removeTyping(typingId);
     botMessage("⚠️ Could not fetch nearby hospitals. Please try again.");
   }
@@ -485,12 +471,8 @@ function resetSymptoms() {
 }
 
 // ── Helpers ───────────────────────────────────────────────
-function botMessage(html) {
-  appendMessage('bot', html);
-}
-function userMessage(text) {
-  appendMessage('user', text);
-}
+function botMessage(html) { appendMessage('bot', html); }
+function userMessage(text) { appendMessage('user', text); }
 
 function appendMessage(type, html) {
   const div = document.createElement('div');
@@ -512,67 +494,11 @@ function showTyping() {
   scrollBottom();
   return id;
 }
-function removeTyping(id) {
-  document.getElementById(id)?.remove();
-}
+function removeTyping(id) { document.getElementById(id)?.remove(); }
 function scrollBottom() {
   const w = document.getElementById('chatWindow');
   w.scrollTop = w.scrollHeight;
 }
-
-// ── Drag to resize input area ─────────────────────────────
-(function() {
-  let isDragging = false;
-  let startY = 0;
-  let startHeight = 0;
-
-  const handle  = document.getElementById('dragHandle');
-  const inputArea = document.getElementById('inputArea');
-  const chatWindow = document.getElementById('chatWindow');
-
-  if (!handle || !inputArea) return;
-
-  handle.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startY = e.clientY;
-    startHeight = inputArea.offsetHeight;
-    document.body.style.cursor = 'ns-resize';
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const delta = startY - e.clientY; // drag up = bigger
-    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
-    inputArea.style.height = newHeight + 'px';
-    inputArea.style.flex = 'none';
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      document.body.style.cursor = '';
-    }
-  });
-
-  // Touch support for mobile
-  handle.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startY = e.touches[0].clientY;
-    startHeight = inputArea.offsetHeight;
-    e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const delta = startY - e.touches[0].clientY;
-    const newHeight = Math.min(Math.max(startHeight + delta, 120), window.innerHeight * 0.75);
-    inputArea.style.height = newHeight + 'px';
-    inputArea.style.flex = 'none';
-  }, { passive: false });
-
-  document.addEventListener('touchend', () => { isDragging = false; });
-})();
 
 function toggleJustifier(el) {
   const body   = el.nextElementSibling;
@@ -588,4 +514,11 @@ function toggleModelInfo(btn) {
   box.style.display = isOpen ? 'none' : 'block';
   btn.style.background = isOpen ? 'transparent' : 'var(--accent)';
   btn.style.color = isOpen ? 'var(--accent)' : '#fff';
+}
+
+function togglePrecautions(btn) {
+  const box    = btn.nextElementSibling;
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  btn.textContent   = isOpen ? '💊 Show Precautions' : '🔼 Hide Precautions';
 }

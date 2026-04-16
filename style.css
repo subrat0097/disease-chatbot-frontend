@@ -364,3 +364,34 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 }
 .model-info-list li { color: var(--muted); }
 .model-info-list strong { color: var(--text); }
+
+
+/* Precautions box */
+.precaution-box {
+  margin-top: 10px;
+  background: #1a1c26;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.precaution-title {
+  font-size: 12px; font-weight: 700;
+  color: var(--accent2); margin-bottom: 8px;
+}
+.precaution-list {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.precaution-item {
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.btn-solution {
+  background: transparent;
+  border: 1px solid var(--accent2);
+  color: var(--accent2);
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+  margin-top: 6px;
+}
+.btn-solution:hover { background: var(--accent2); color: #000; }
