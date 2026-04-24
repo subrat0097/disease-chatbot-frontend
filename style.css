@@ -89,18 +89,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .input-area {
   padding: 16px 24px; border-top: 1px solid var(--border);
   background: var(--sidebar); display: flex; flex-direction: column; gap: 12px;
+  min-height: 120px; max-height: 80vh;
 }
-
-/* Text inputs */
-.row-inputs { display: flex; gap: 12px; }
-.field-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
-.field-group label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-.field-group input, .field-group select {
-  background: var(--card); border: 1px solid var(--border); color: var(--text);
-  border-radius: 8px; padding: 9px 12px; font-size: 14px; outline: none;
-  font-family: var(--font);
-}
-.field-group input:focus, .field-group select:focus { border-color: var(--accent); }
 
 /* Symptom chips */
 .symptom-search {
@@ -208,27 +198,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   padding-left: 8px;
 }
 
-/* Duration picker */
-.duration-grid {
-  display: flex; flex-wrap: wrap; gap: 8px;
-}
-.duration-btn {
-  padding: 7px 14px; border-radius: 20px; font-size: 12px;
-  cursor: pointer; border: 1px solid var(--border);
-  background: var(--card); color: var(--muted);
-  transition: all .15s; font-family: var(--font);
-}
-.duration-btn:hover:not(:disabled) {
-  border-color: var(--accent); color: var(--accent);
-}
-
-/* Duration in result card */
-.result-duration {
-  font-size: 12px; color: var(--muted);
-  border-top: 1px solid var(--border);
-  padding-top: 8px; margin-top: 4px;
-}
-
 /* Drag handle */
 .drag-handle {
   width: 100%; display: flex; justify-content: center;
@@ -241,13 +210,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   border-radius: 4px; transition: background .2s;
 }
 .drag-handle:hover .drag-bar { background: var(--accent); }
-
-/* Make input area resizable */
-.input-area {
-  min-height: 120px;
-  max-height: 80vh;
-  resize: none; /* we handle it manually */
-}
 
 /* Hospital cards */
 .hospital-list {
@@ -365,7 +327,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
 .model-info-list li { color: var(--muted); }
 .model-info-list strong { color: var(--text); }
 
-
 /* Precautions box */
 .precaution-box {
   margin-top: 10px;
@@ -385,6 +346,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   font-size: 12px; color: var(--muted);
   display: flex; align-items: flex-start; gap: 6px;
 }
+.precaution-doctor {
+  font-size: 12px; font-weight: 600; color: var(--danger);
+  margin-bottom: 8px;
+}
 .btn-solution {
   background: transparent;
   border: 1px solid var(--accent2);
@@ -395,3 +360,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); heig
   margin-top: 6px;
 }
 .btn-solution:hover { background: var(--accent2); color: #000; }
+
+/* Reused for hospital Yes/No buttons */
+.duration-btn {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted);
+  transition: all .15s; font-family: var(--font);
+}
+.duration-btn:hover:not(:disabled) {
+  border-color: var(--accent); color: var(--accent);
+}

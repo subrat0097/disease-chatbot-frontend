@@ -8,7 +8,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   renderInputArea();
   botMessage("👋 Hi! I'm <strong>MediBot</strong>. I'll help predict a possible disease based on your symptoms.");
   await loadSymptoms();
-  botMessage("Please fill in your details below, then select the symptoms you're experiencing.");
+  botMessage("Please select the symptoms you're experiencing.");
 });
 
 async function loadSymptoms() {
@@ -27,20 +27,6 @@ function renderInputArea() {
   document.getElementById('inputArea').innerHTML = `
     <div class="drag-handle" id="dragHandle">
       <div class="drag-bar"></div>
-    </div>
-    <div class="row-inputs">
-      <div class="field-group">
-        <label>Age</label>
-        <input type="number" id="ageInput" min="1" max="110" placeholder="e.g. 28" value="25"/>
-      </div>
-      <div class="field-group">
-        <label>Gender</label>
-        <select id="genderInput">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
     </div>
 
     <input class="symptom-search" id="symptomSearch" placeholder="🔍  Search symptoms…" oninput="filterChips(this.value)"/>
@@ -148,65 +134,24 @@ function renderTags() {
 
 // ── Predict ───────────────────────────────────────────────
 async function predict() {
-  const age    = parseInt(document.getElementById('ageInput').value);
-  const gender = document.getElementById('genderInput').value;
+  if (selectedSymptoms.length === 0) {
+    botMessage("⚠️ Please select at least one symptom.");
+    return;
+  }
 
-  if (!age || age < 1) { botMessage("⚠️ Please enter a valid age."); return; }
-  if (selectedSymptoms.length === 0) { botMessage("⚠️ Please select at least one symptom."); return; }
+  userMessage(`Symptoms: ${selectedSymptoms.join(', ')}`);
 
-  userMessage(`Age: ${age} | Gender: ${gender} | Symptoms: ${selectedSymptoms.join(', ')}`);
-
-  botMessage("🕒 One more thing — <strong>how long have you been experiencing these symptoms?</strong>");
-  showDurationPicker(age, gender);
-}
-
-// ── Duration Picker ───────────────────────────────────────
-function showDurationPicker(age, gender) {
-  const durations = [
-    "Not sure", "Less than a day", "1 - 3 days", "4 - 7 days",
-    "1 - 2 weeks", "2 - 4 weeks", "1 - 3 months", "More than 3 months"
-  ];
-
-  const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.id = 'durationPicker';
-  div.innerHTML = `
-    <div class="avatar">+</div>
-    <div class="bubble">
-      <div class="duration-grid">
-        ${durations.map(d => `
-          <button class="duration-btn" onclick="selectDuration('${d}', ${age}, '${gender}', this)">
-            ${d}
-          </button>
-        `).join('')}
-      </div>
-    </div>
-  `;
-  document.getElementById('chatWindow').appendChild(div);
-  scrollBottom();
-}
-
-async function selectDuration(duration, age, gender, btnEl) {
-  document.querySelectorAll('.duration-btn').forEach(b => {
-    b.disabled = true;
-    b.style.opacity = '0.5';
-  });
-  btnEl.style.opacity = '1';
-  btnEl.style.borderColor = 'var(--accent)';
-  btnEl.style.color = 'var(--accent)';
-
-  userMessage(`Duration: ${duration}`);
   const typingId = showTyping();
 
   try {
     const res  = await fetch(`${API}/predict`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ symptoms: selectedSymptoms, age, gender, duration })
+      body:    JSON.stringify({ symptoms: selectedSymptoms })
     });
     const data = await res.json();
     removeTyping(typingId);
-    showResult(data, duration);
+    showResult(data);
   } catch {
     removeTyping(typingId);
     botMessage("❌ Could not reach the backend. Is <code>app.py</code> running?");
@@ -214,7 +159,7 @@ async function selectDuration(duration, age, gender, btnEl) {
 }
 
 // ── Show result card ──────────────────────────────────────
-function showResult(data, duration = null) {
+function showResult(data) {
   const top3Html = data.top3.map((item, i) => {
     const matched   = item.matched_symptoms || [];
     const total     = item.total_known || 8;
@@ -240,9 +185,8 @@ function showResult(data, duration = null) {
       ? unmatched.map(s => `<span class="unmatched-tag">${s.replace(/_/g, ' ')}</span>`).join('')
       : '<span style="color:var(--muted);font-size:11px">All your symptoms matched</span>';
 
-    // ── Precautions ──────────────────────────────────────
-    const precautions = item.precautions || [];
-    const needsDoctor = item.needs_doctor || false;
+    const precautions    = item.precautions || [];
+    const needsDoctor    = item.needs_doctor || false;
 
     const precautionItemsHtml = precautions.length > 0
       ? precautions.map(p => `<div class="precaution-item">💊 ${p}</div>`).join('')
@@ -251,7 +195,6 @@ function showResult(data, duration = null) {
     const doctorWarningHtml = needsDoctor
       ? `<div class="precaution-doctor">🚨 This condition requires a doctor — please seek medical attention immediately.</div>`
       : '';
-    // ────────────────────────────────────────────────────
 
     return `
       <div class="top3-item">
@@ -285,7 +228,6 @@ function showResult(data, duration = null) {
         </div>
       </div>
 
-      <!-- Precautions button + box -->
       <button class="btn-solution" onclick="togglePrecautions(this)">💊 Show Precautions</button>
       <div class="precaution-box" style="display:none">
         ${doctorWarningHtml}
@@ -318,7 +260,6 @@ function showResult(data, duration = null) {
         <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Top 3 possibilities</div>
         ${top3Html}
       </div>
-      ${duration ? `<div class="result-duration">🕒 Symptoms since: <strong>${duration}</strong></div>` : ''}
     </div>
     <div style="font-size:12px;color:var(--muted);margin-top:4px">
       ⚠️ This is not a medical diagnosis. Please consult a healthcare professional.
